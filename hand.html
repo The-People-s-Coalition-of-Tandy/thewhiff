@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Hand</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #hand-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #base {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .finger-icon {
+            position: absolute;
+            width: 40px;
+            /* height: 40px; */
+            border-radius: 50%;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.85));
+            padding: 10px;
+            /* background-color: rgb(255, 255, 255); */
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            z-index: 10;
+            transition: background-color 0.3s;
+        }
+
+        .finger-icon:hover {
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Position icons on specific parts of the hand */
+        #thumb-icon {
+            left: 50%;
+            top: 52%;
+        }
+
+        #index-icon {
+            left: 37%;
+            top: 47%;
+        }
+
+        #middle-icon {
+            left: 45%;
+            top: 35%;
+        }
+
+        #ring-icon {
+            left: 46%;
+            top: 47%;
+        }
+
+        #pinky-icon {
+            left: 55%;
+            top: 58%;
+        }
+    </style>
+</head>
+<body>
+    <div id="hand-container">
+        <img id="base" src="./frames/dither_it_base2.png" alt="hand">
+        
+        <!-- Finger icons -->
+        <div id="thumb-icon" class="finger-icon"><img width="40px"  src="./assets/apple.png" alt="thumb"></div>
+        <div id="index-icon" class="finger-icon"><img width="40px"  src="./assets/spotify.png" alt="index"></div>
+        <div id="middle-icon" class="finger-icon"><img width="40px"  src="./assets/bc.png" alt="middle"></div>
+        <div id="ring-icon" class="finger-icon"><img width="40px"  src="./assets/yt.png" alt="ring"></div>
+        <div id="pinky-icon" class="finger-icon"><img width="40px"  src="./assets/TandyLogo.png" alt="pinky"></div>
+    </div>
+
+    <script>
+        const base = document.getElementById('base');
+        const handContainer = document.getElementById('hand-container');
+        
+        // Finger state tracking
+        const fingers = {
+            'thumb': { currentFrame: 0, animating: false },
+            'index': { currentFrame: 0, animating: false },
+            'middle': { currentFrame: 0, animating: false },
+            'ring': { currentFrame: 0, animating: false },
+            'pinky': { currentFrame: 0, animating: false }
+        };
+        
+        // Frame paths for each finger
+        const fingerFrames = {
+            'thumb': Array.from({length: 7}, (_, i) => `./frames/thumb/dither_it_${i+1}.png`),
+            'index': Array.from({length: 7}, (_, i) => `./frames/index/dither_it_${i+1}.png`),
+            'middle': Array.from({length: 7}, (_, i) => `./frames/middle/dither_it_${i+1}.png`),
+            'ring': Array.from({length: 7}, (_, i) => `./frames/ring/dither_it_${i+1}.png`),
+            'pinky': Array.from({length: 7}, (_, i) => `./frames/pinky/dither_it_${i+1}.png`)
+        };
+        // const fingerFrames = {
+        //     'thumb': Array.from({length: 7}, (_, i) => `./frames/thumb/${i+1}.png`),
+        //     'index': Array.from({length: 7}, (_, i) => `./frames/index/${i+1}.png`),
+        //     'middle': Array.from({length: 7}, (_, i) => `./frames/middle/${i+1}.png`),
+        //     'ring': Array.from({length: 7}, (_, i) => `./frames/ring/${i+1}.png`),
+        //     'pinky': Array.from({length: 7}, (_, i) => `./frames/pinky/${i+1}.png`)
+        // };
+        
+        // Preload all images for smoother animations
+        const preloadImages = () => {
+            for (const finger in fingerFrames) {
+                fingerFrames[finger].forEach(src => {
+                    const img = new Image();
+                    img.src = src;
+                });
+            }
+        };
+        
+        // Call preload on page load
+        preloadImages();
+        
+        // Function to animate a finger bending or extending
+        function animateFinger(fingerName, direction) {
+            // Stop any existing animation for this finger
+            if (fingers[fingerName].animationInterval) {
+                clearInterval(fingers[fingerName].animationInterval);
+            }
+            
+            // Set animating state to true
+            fingers[fingerName].animating = true;
+            
+            // Start the animation interval
+            fingers[fingerName].animationInterval = setInterval(() => {
+                // Update the frame based on direction (1 = close, -1 = open)
+                fingers[fingerName].currentFrame += direction;
+                
+                // Check bounds
+                if ((direction > 0 && fingers[fingerName].currentFrame >= 6) || 
+                    (direction < 0 && fingers[fingerName].currentFrame <= 0)) {
+                    // Stop at limits
+                    fingers[fingerName].currentFrame = Math.max(0, Math.min(6, fingers[fingerName].currentFrame));
+                    clearInterval(fingers[fingerName].animationInterval);
+                    fingers[fingerName].animating = false;
+                }
+                
+                // Update the hand image to composite of base and current finger frame
+                updateHandImage();
+            }, 60);
+        }
+        
+        // Function to update the hand image based on current finger states
+        function updateHandImage() {
+            // Create a canvas to composite the images
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set dimensions based on the base image
+            const baseImg = new Image();
+            baseImg.onload = () => {
+                canvas.width = baseImg.width;
+                canvas.height = baseImg.height;
+                
+                // Draw the base image
+                ctx.drawImage(baseImg, 0, 0);
+                
+                // Function to draw each finger that's not in base position
+                const drawFingers = () => {
+                    let fingersToLoad = 0;
+                    let fingersLoaded = 0;
+                    
+                    for (const finger in fingers) {
+                        if (fingers[finger].currentFrame > 0) {
+                            fingersToLoad++;
+                            const fingerImg = new Image();
+                            fingerImg.onload = () => {
+                                ctx.drawImage(fingerImg, 0, 0);
+                                fingersLoaded++;
+                                
+                                if (fingersLoaded === fingersToLoad) {
+                                    // Update the displayed image
+                                    base.src = canvas.toDataURL('image/png');
+                                }
+                            };
+                            fingerImg.src = fingerFrames[finger][fingers[finger].currentFrame];
+                        }
+                    }
+                    
+                    // If no fingers to load, just display base
+                    if (fingersToLoad === 0) {
+                        base.src = canvas.toDataURL('image/png');
+                    }
+                };
+                
+                drawFingers();
+            };
+            baseImg.src = './frames/dither_it_base2.png';
+        }
+        
+        // Set up event listeners for each finger icon
+        document.querySelectorAll('.finger-icon').forEach(icon => {
+            const fingerName = icon.id.split('-')[0];
+            
+            icon.addEventListener('mouseover', () => {
+                animateFinger(fingerName, 1); // Close finger
+            });
+            
+            icon.addEventListener('mouseout', () => {
+                animateFinger(fingerName, -1); // Open finger
+            });
+        });
+    </script>
+</body>
+</html>
