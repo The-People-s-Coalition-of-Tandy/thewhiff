@@ -3,247 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="index2.css">
     <title>The Whiff</title>
 </head>
-<body>
-    <h1>The Whiff</h1>
-    <canvas id="canvas"></canvas>
+<body>   
+    <video id="background-video" autoplay muted loop>
+        <source src="./clips/om4.mp4" type="video/mp4">
+    </video>
+    <video id="video2" autoplay muted loop>
+        <source src="./clips/om8.mp4" type="video/mp4">
+    </video>
+    <video id="video3" autoplay muted loop>
+        <source src="./clips/om7.mp4" type="video/mp4">
+    </video>
+    
+    <div class="logo-container">
+        <img src="./assets/title.png" alt="The Whiff" class="logo">
+    </div>
+    <button id="button1">Old Maybe</button>
+    <button id="button2">Album by Old Maybe</button>
+    <button id="button3">The Whiff</button>
     <main>
-       <ul>
-        <li>Music Video</li>
-        <li>Pre-Save</li>
-        <li>Merch</li>
-       </ul>
+       <div class="link-container">
+           <div class="video-link-wrapper">
+               <a href="#music-video" class="video-link">Music Video</a>
+               <video class="link-video" autoplay muted loop>
+                   <source src="./clips/om4.mp4" type="video/mp4">
+               </video>
+           </div>
+           <div class="video-link-wrapper">
+               <a href="#pre-save" class="video-link">Pre-Save</a>
+               <video class="link-video" autoplay muted loop>
+                   <source src="./clips/om1.mp4" type="video/mp4">
+               </video>
+           </div>
+           <div class="video-link-wrapper">
+               <a href="#merch" class="video-link">Merch</a>
+               <video class="link-video" autoplay muted loop>
+                   <source src="./clips/om2.mp4" type="video/mp4">
+               </video>
+           </div>
+       </div>
     </main>
+
     <script>
-        // Get canvas and set up context
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        
-        // Make canvas responsive
-        function resizeCanvas() {
-            const windowWidth = window.innerWidth;
-            const windowHeight = window.innerHeight * 0.6; // Take up 60% of viewport height
-            canvas.width = windowWidth;
-            canvas.height = windowHeight;
-        }
-        
-        // Initial resize and add event listener for window resizing
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-        
-        // Video sources - add your video files here
-        const videoSources = [
-            './clips/om1.mp4',
-            './clips/om2.mp4',
-            './clips/om3.mp4',
-            './clips/om4.mp4',
-            // './clips/om5.mp4',
-            // './clips/om6.mp4',
-            // './clips/om7.mp4',
-            // './clips/om8.mp4',
-            // './clips/om9.mp4',
-            './clips/om10.mp4',
-        ];
-        
-        // Video animation properties
-        const videoAnimations = [];
-        let loadedVideos = 0;
-        
-        // Create and load videos
-        // Create and load videos
-        const videos = [];
-        
-        videoSources.forEach((src, index) => {
-            if (src) { // Check if source exists
-                const video = document.createElement('video');
-                video.src = src;
-                video.loop = true;
-                video.muted = true; // Mute videos for autoplay
-                video.playsInline = true; // Better mobile support
-                
-                // Initialize animation properties for this video
-                videoAnimations[index] = {
-                    opacity: 0,
-                    targetOpacity: Math.random() * 0.5 + 0.5, // Random target opacity
-                    x: Math.random() * canvas.width * 0.6 + canvas.width * 0.2, // Random x position
-                    y: Math.random() * canvas.height * 0.6 + canvas.height * 0.2, // Random y position
-                    scale: Math.random() * 0.4 + 0.3, // Random scale between 0.3 and 0.7
-                    rotation: Math.random() * 0.1 - 0.05, // Slight random rotation
-                    moveSpeed: Math.random() * 0.2 + 0.1, // Random movement speed
-                    fadeSpeed: Math.random() * 0.01 + 0.005, // Random fade speed
-                    direction: Math.random() * Math.PI * 2, // Random direction
-                    changeDirectionTime: 0, // Time until direction change
-                };
-                
-                // Only start playing when video is ready
-                video.addEventListener('canplaythrough', () => {
-                    video.play();
-                    loadedVideos++;
-                    
-                    // Start animation when all videos are loaded
-                    if (loadedVideos === videoSources.filter(Boolean).length) {
-                        // Start the animation cycle
-                        setInterval(updateVideoAnimations, 5000); // Change animations every 5 seconds
-                        animate();
-                    }
+        // Make sure all videos play
+        document.addEventListener('DOMContentLoaded', () => {
+            const videos = document.querySelectorAll('video');
+            videos.forEach(video => {
+                video.play().catch(error => {
+                    console.log("Video play failed:", error);
                 });
+            });
+            
+            // Make the video links clickable
+            const videoLinkWrappers = document.querySelectorAll('.video-link-wrapper');
+            videoLinkWrappers.forEach(wrapper => {
+                const link = wrapper.querySelector('.video-link');
+                const video = wrapper.querySelector('.link-video');
                 
-                videos.push(video);
-            }
+                video.addEventListener('click', () => {
+                    link.click();
+                });
+            });
         });
-        
-        // Update video animations
-        function updateVideoAnimations() {
-            videos.forEach((_, index) => {
-                // Decide if this video should fade in or out
-                const shouldBeVisible = Math.random() > 0.3; // 70% chance to be visible
-                
-                videoAnimations[index].targetOpacity = shouldBeVisible ? 
-                    Math.random() * 0.5 + 0.5 : // Random opacity between 0.5 and 1.0
-                    0; // Fade out completely
-                
-                // Randomize position if fading in
-                if (shouldBeVisible && videoAnimations[index].opacity < 0.1) {
-                    videoAnimations[index].x = Math.random() * canvas.width * 0.6 + canvas.width * 0.2;
-                    videoAnimations[index].y = Math.random() * canvas.height * 0.6 + canvas.height * 0.2;
-                    videoAnimations[index].scale = Math.random() * 0.4 + 0.3;
-                    videoAnimations[index].rotation = Math.random() * 0.1 - 0.05;
-                    videoAnimations[index].direction = Math.random() * Math.PI * 2;
-                }
-            });
-        }
-        
-        // Apply vignette effect to each video
-        function applyVideoVignettes(pos, opacity) {
-            // Create a vignette for each video
-            const centerX = pos.x + pos.width / 2;
-            const centerY = pos.y + pos.height / 2;
-            
-            // Create a gradient that's stretched to match video dimensions
-            const gradient = ctx.createRadialGradient(
-                centerX, centerY, 0,                      // Inner circle
-                centerX, centerY, Math.max(pos.width, pos.height) * 0.7  // Outer circle
-            );
-            
-            gradient.addColorStop(0, `rgba(0, 0, 0, 0)`);
-            gradient.addColorStop(0.6, `rgba(0, 0, 0, 0)`);  // Keep center 60% clear
-            gradient.addColorStop(1, `rgba(0, 0, 0, ${opacity})`);
-            
-            // Apply the gradient
-            ctx.fillStyle = gradient;
-            ctx.fillRect(pos.x - pos.width/2, pos.y - pos.height/2, pos.width * 2, pos.height * 2);
-            
-            // Create horizontal gradient for wider videos
-            if (pos.width > pos.height) {
-                const gradientH = ctx.createLinearGradient(
-                    pos.x, 0, 
-                    pos.x + pos.width, 0
-                );
-                
-                gradientH.addColorStop(0, `rgba(0, 0, 0, ${opacity * 0.7})`);
-                gradientH.addColorStop(0.2, `rgba(0, 0, 0, 0)`);
-                gradientH.addColorStop(0.8, `rgba(0, 0, 0, 0)`);
-                gradientH.addColorStop(1, `rgba(0, 0, 0, ${opacity * 0.7})`);
-                
-                ctx.fillStyle = gradientH;
-                ctx.fillRect(pos.x, pos.y, pos.width, pos.height);
-            }
-            
-            // Create vertical gradient for taller videos
-            if (pos.height >= pos.width) {
-                const gradientV = ctx.createLinearGradient(
-                    0, pos.y,
-                    0, pos.y + pos.height
-                );
-                
-                gradientV.addColorStop(0, `rgba(0, 0, 0, ${opacity * 0.7})`);
-                gradientV.addColorStop(0.2, `rgba(0, 0, 0, 0)`);
-                gradientV.addColorStop(0.8, `rgba(0, 0, 0, 0)`);
-                gradientV.addColorStop(1, `rgba(0, 0, 0, ${opacity * 0.7})`);
-                
-                ctx.fillStyle = gradientV;
-                ctx.fillRect(pos.x, pos.y, pos.width, pos.height);
-            }
-        }
-        
-        // Animation loop
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Update and draw each video
-            videos.forEach((video, index) => {
-                if (video.readyState >= 2) { // Only draw if video is loaded
-                    const anim = videoAnimations[index];
-                    
-                    // Update opacity with smooth transition
-                    if (anim.opacity < anim.targetOpacity) {
-                        anim.opacity = Math.min(anim.opacity + anim.fadeSpeed, anim.targetOpacity);
-                    } else if (anim.opacity > anim.targetOpacity) {
-                        anim.opacity = Math.max(anim.opacity - anim.fadeSpeed, anim.targetOpacity);
-                    }
-                    
-                    // Skip rendering if nearly invisible
-                    if (anim.opacity < 0.01) {
-                        return; // Use return instead of continue in forEach callback
-                    }
-                    
-                    // Update position with gentle drifting
-                    anim.changeDirectionTime -= 0.016; // Assuming 60fps
-                    if (anim.changeDirectionTime <= 0) {
-                        anim.direction += (Math.random() * 0.2 - 0.1); // Slight direction change
-                        anim.changeDirectionTime = Math.random() * 2 + 1; // 1-3 seconds until next change
-                    }
-                    
-                    // Move in current direction
-                    anim.x += Math.cos(anim.direction) * anim.moveSpeed;
-                    anim.y += Math.sin(anim.direction) * anim.moveSpeed;
-                    
-                    // Bounce off edges
-                    if (anim.x < 0 || anim.x > canvas.width) {
-                        anim.direction = Math.PI - anim.direction;
-                    }
-                    if (anim.y < 0 || anim.y > canvas.height) {
-                        anim.direction = -anim.direction;
-                    }
-                    
-                    // Calculate dimensions based on scale
-                    const width = video.videoWidth * anim.scale;
-                    const height = video.videoHeight * anim.scale;
-                    
-                    // Save context for rotation
-                    ctx.save();
-                    
-                    // Translate to center of where we want to draw the video
-                    ctx.translate(anim.x, anim.y);
-                    
-                    // Rotate
-                    ctx.rotate(anim.rotation);
-                    
-                    // Set global alpha for fading
-                    ctx.globalAlpha = anim.opacity;
-                    
-                    // Draw video centered at the translated point
-                    ctx.drawImage(video, -width/2, -height/2, width, height);
-                    
-                    // Apply vignette
-                    applyVideoVignettes({
-                        x: -width/2,
-                        y: -height/2,
-                        width: width,
-                        height: height
-                    }, anim.opacity);
-                    
-                    // Restore context
-                    ctx.restore();
-                }
-            });
-            
-            requestAnimationFrame(animate);
-        }
     </script>
 </body>
 </html>
