@@ -15,6 +15,7 @@
             position: relative;
             width: 100vw;
             height: 100vh;
+            display: flex;
         }
 
         #base {
@@ -38,6 +39,7 @@
             font-weight: bold;
             z-index: 10;
             transition: background-color 0.3s;
+            transform: translate(-50%, -50%);
         }
 
         .finger-icon:hover {
@@ -76,16 +78,89 @@
         <img id="base" src="./frames/dither_it_base2.png" alt="hand">
         
         <!-- Finger icons -->
-        <div id="thumb-icon" class="finger-icon"><img width="40px"  src="./assets/apple.png" alt="thumb"></div>
-        <div id="index-icon" class="finger-icon"><img width="40px"  src="./assets/spotify.png" alt="index"></div>
-        <div id="middle-icon" class="finger-icon"><img width="40px"  src="./assets/bc.png" alt="middle"></div>
-        <div id="ring-icon" class="finger-icon"><img width="40px"  src="./assets/yt.png" alt="ring"></div>
-        <div id="pinky-icon" class="finger-icon"><img width="40px"  src="./assets/TandyLogo.png" alt="pinky"></div>
+        <a href="https://tandy.bandcamp.com/album/the-whiff" target="_blank"><div id="thumb-icon" class="finger-icon"><img width="40px"  src="./assets/cd.png" alt="thumb"></div></a>
+        <a href="www.youtube.com/watch?v=tLgDpKo6q5o" target="_blank"><div id="index-icon" class="finger-icon"><img width="40px"  src="./assets/yt.png" alt="index"></div></a>
+        <a href="https://oldmaybe.bandcamp.com/" target="_blank"><div id="middle-icon" class="finger-icon"><img width="40px"  src="./assets/bc.png" alt="middle"></div></a>
+        <a href="https://www.instagram.com/oldmaybe_/" target="_blank"><div id="ring-icon" class="finger-icon"><img width="40px"  src="./assets/insta.png" alt="ring"></div></a>
+        <a href="https://tandy.bandcamp.com/" target="_blank"><div id="pinky-icon" class="finger-icon"><img width="40px"  src="./assets/TandyLogo.png" alt="pinky"></div></a>
     </div>
 
     <script>
         const base = document.getElementById('base');
         const handContainer = document.getElementById('hand-container');
+        
+        // Define the finger positions as percentages of the image
+        const fingerPositions = {
+            'thumb-icon': { x: 51, y: 52 },
+            'index-icon': { x: 38, y: 50 },
+            'middle-icon': { x: 46, y: 37 },
+            'ring-icon': { x: 47, y: 49 },
+            'pinky-icon': { x: 56, y: 60 }
+        };
+        
+        // Function to position finger icons accounting for object-fit: cover
+        function positionFingerIcons() {
+            // Original image dimensions (you need to replace these with your actual image dimensions)
+            const imgOriginalWidth = 1200;  // Replace with your image's actual width
+            const imgOriginalHeight = 800;  // Replace with your image's actual height
+            const imgAspectRatio = imgOriginalWidth / imgOriginalHeight;
+            
+            // Current container dimensions
+            const containerWidth = handContainer.offsetWidth;
+            const containerHeight = handContainer.offsetHeight;
+            const containerAspectRatio = containerWidth / containerHeight;
+            
+            // Scale factor calculation based on object-fit: cover behavior
+            let scaleFactor, offsetX = 0, offsetY = 0;
+            
+            if (containerAspectRatio > imgAspectRatio) {
+                // Container is wider than image - image width will match container width
+                scaleFactor = containerWidth / imgOriginalWidth;
+                // Calculate vertical offset due to cropping
+                const displayedHeight = imgOriginalHeight * scaleFactor;
+                offsetY = (containerHeight - displayedHeight) / 2;
+            } else {
+                // Container is taller than image - image height will match container height
+                scaleFactor = containerHeight / imgOriginalHeight;
+                // Calculate horizontal offset due to cropping
+                const displayedWidth = imgOriginalWidth * scaleFactor;
+                offsetX = (containerWidth - displayedWidth) / 2;
+            }
+            
+            // Position each finger icon
+            for (const id in fingerPositions) {
+                const icon = document.getElementById(id);
+                if (icon) {
+                    // Calculate position in pixels
+                    let posX, posY;
+                    
+                    if (containerAspectRatio > imgAspectRatio) {
+                        // Width-constrained: full width is used
+                        posX = (fingerPositions[id].x / 100) * containerWidth;
+                        // Height is scaled and may have offset
+                        const scaledImgHeight = containerWidth / imgAspectRatio;
+                        posY = (fingerPositions[id].y / 100) * scaledImgHeight;
+                        // Adjust for any vertical centering
+                        posY += (containerHeight - scaledImgHeight) / 2;
+                    } else {
+                        // Height-constrained: full height is used
+                        posY = (fingerPositions[id].y / 100) * containerHeight;
+                        // Width is scaled and may have offset
+                        const scaledImgWidth = containerHeight * imgAspectRatio;
+                        posX = (fingerPositions[id].x / 100) * scaledImgWidth;
+                        // Adjust for any horizontal centering
+                        posX += (containerWidth - scaledImgWidth) / 2;
+                    }
+                    
+                    icon.style.left = `${posX}px`;
+                    icon.style.top = `${posY}px`;
+                }
+            }
+        }
+        
+        // Position icons initially and whenever window is resized
+        window.addEventListener('load', positionFingerIcons);
+        window.addEventListener('resize', positionFingerIcons);
         
         // Finger state tracking
         const fingers = {
@@ -201,7 +276,6 @@
             };
             baseImg.src = './frames/dither_it_base2.png';
         }
-        
         // Set up event listeners for each finger icon
         document.querySelectorAll('.finger-icon').forEach(icon => {
             const fingerName = icon.id.split('-')[0];
