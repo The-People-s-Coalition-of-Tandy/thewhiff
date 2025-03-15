@@ -3,11 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Whiff Hand</title>
+    <title>The Whiff - Old Maybe</title>
+    
+    <!-- Basic SEO metadata -->
+    <meta name="description" content="The Whiff - A new album by Old Maybe. Released via the People's Coalition of Tandy">
+    <meta name="keywords" content="Old Maybe, The Whiff, music, album, Tandy">
+    <meta name="author" content="Old Maybe">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook metadata -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://whiff.pcotandy.org/">
+    <meta property="og:title" content="The Whiff - Old Maybe">
+    <meta property="og:description" content="The Whiff - A new album by Old Maybe. Released via the People's Coalition of Tandy">
+    <meta property="og:image" content="https://whiff.pcotandy.org/assets/title.png">
+    
+    <!-- Twitter metadata -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://whiff.pcotandy.org/">
+    <meta name="twitter:title" content="The Whiff - Old Maybe">
+    <meta name="twitter:description" content="The Whiff - A new album by Old Maybe. Released via the People's Coalition of Tandy">
+    <meta name="twitter:image" content="https://whiff.pcotandy.org/assets/title.png">
+    
+    <!-- Favicon links -->
+    <link rel="icon" href="../assets/favicon/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="../assets/favicon/favicon.ico" type="image/x-icon">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/favicon/apple-touch-icon.png">
+    
     <style>
         @font-face {
             font-family: "shin";
-            src: url("./assets/shin.otf");
+            src: url("../assets/shin.otf");
         }
 
         body {
@@ -53,7 +81,7 @@
             transform: translate(-50%, -50%);
             filter: brightness(0.8);
             opacity: 0; /* Start with icons invisible */
-            transition: opacity 0.5s ease, transform 0.3s ease; /* Add transform to transition */
+            transition: opacity 0.3s ease, transform 0.3s ease; /* Add transform to transition */
         }
 
         .finger-icon:hover {
@@ -71,6 +99,23 @@
             font-family: Arial, sans-serif;
             -webkit-text-stroke: 1px black;
             font-weight: bold;
+        }
+
+        /* Make icons smaller on mobile devices */
+        @media (max-width: 767px) {
+            .finger-icon {
+                width: 30px;
+            }
+            
+            .finger-icon img {
+                width: 30px !important;
+            }
+            
+            .icon-text {
+                font-size: 14px;
+                margin-top: 3px;
+                -webkit-text-stroke: 0 black;
+            }
         }
 
         /* Position icons on specific parts of the hand */
@@ -108,6 +153,18 @@
             object-fit: cover;
         }
 
+        /* Hide background video on mobile devices */
+        @media (max-width: 767px) {
+            #background-video {
+                display: none;
+            }
+            
+            /* Optional: Add a solid background color for mobile */
+            body {
+                background-color: #000;
+            }
+        }
+
         #red {
             position: absolute;
             bottom: 0;
@@ -126,60 +183,64 @@
 
         #title {
             position: absolute;
-            transform: translateX(-50%);
-            left: 50%;
+            /* transform: translateX(-50%); */
+            /* left: 50%; */
+            right: 0;
             bottom: 0;
             width: 100%;
             max-width: 300px;
         }
+        
+        /* Mobile-specific title positioning */
+        @media (max-width: 767px) {
+            #title {
+                top: 10px;
+                bottom: auto;
+                right: auto;
+                left: 50%;
+                transform: translateX(-50%);
+                max-width: 200px; /* Smaller on mobile */
+            }
+        }
     </style>
 </head>
 <body>
-    <video id="background-video" autoplay loop muted>  
-        <source src="./clips/om9.mp4" type="video/mp4">
+    <video id="background-video" autoplay loop muted playsinline>  
+        <source src="../clips/om9.mp4" type="video/mp4">
     </video>
 
-
-    <!-- <video id="red" autoplay loop muted>  
-        <source src="./clips/om7.mp4" type="video/mp4">
-    </video>
-
-    <video id="jazz" autoplay loop muted>  
-        <source src="./clips/om8.mp4" type="video/mp4">
-    </video> -->
-
-    <img id="title" src="./assets/title.png" alt="title">
+    <img id="title" src="../assets/title.png" alt="title">
     <div id="hand-container">
-        <img id="base" src="./frames/basetransparent.png" alt="hand">
+        <img id="base" src="../frames/basetransparent.png" alt="hand">
         
         <!-- Finger icons -->
         <a href="https://tandy.bandcamp.com/album/the-whiff" target="_blank">
             <div id="thumb-icon" class="finger-icon">
-                <img width="40px" src="./assets/cd.png" alt="thumb">
+                <img width="40px" src="../assets/cd.png" alt="thumb">
                 <div class="icon-text">CD</div>
             </div>
         </a>
         <a href="https://www.youtube.com/watch?v=tLgDpKo6q5o" target="_blank">
             <div id="index-icon" class="finger-icon">
-                <img width="40px" src="./assets/yt.png" alt="index">
+                <img width="40px" src="../assets/yt.png" alt="index">
                 <div class="icon-text">YouTube</div>
             </div>
         </a>
         <a href="https://tandy.bandcamp.com/album/the-whiff" target="_blank">
             <div id="middle-icon" class="finger-icon">
-                <img width="40px" src="./assets/bc.png" alt="middle">
+                <img width="40px" src="../assets/bc.png" alt="middle">
                 <div class="icon-text">Bandcamp</div>
             </div>
         </a>
         <a href="https://www.instagram.com/oldmaybe_/" target="_blank">
             <div id="ring-icon" class="finger-icon">
-                <img width="40px" src="./assets/insta.png" alt="ring">
+                <img width="40px" src="../assets/insta.png" alt="ring">
                 <div class="icon-text">Insta</div>
             </div>
         </a>
-        <a href="https://tandy.bandcamp.com/" target="_blank">
+        <a href="https://pcotandy.org" target="_blank">
             <div id="pinky-icon" class="finger-icon">
-                <img width="40px" src="./assets/TandyLogo.png" alt="pinky">
+                <img width="40px" src="../assets/TandyLogo.png" alt="pinky">
                 <div class="icon-text">Tandy</div>
             </div>
         </a>
@@ -242,7 +303,8 @@
             }
         }
         
-        // Position icons initially and whenever window is resized
+        // Position icons immediately and whenever window is resized
+        positionFingerIcons(); // Position immediately on script execution
         window.addEventListener('load', positionFingerIcons);
         window.addEventListener('resize', positionFingerIcons);
         
@@ -257,25 +319,51 @@
         
         // Frame paths for each finger
         const fingerFrames = {
-            'thumb': Array.from({length: 7}, (_, i) => `./frames/thumb/${i+1}.png`),
-            'index': Array.from({length: 7}, (_, i) => `./frames/index/${i+1}.png`),
-            'middle': Array.from({length: 7}, (_, i) => `./frames/middle/${i+1}.png`),
-            'ring': Array.from({length: 7}, (_, i) => `./frames/ring/${i+1}.png`),
-            'pinky': Array.from({length: 7}, (_, i) => `./frames/pinky/${i+1}.png`)
+            'thumb': Array.from({length: 7}, (_, i) => `../frames/thumb/${i+1}.png`),
+            'index': Array.from({length: 7}, (_, i) => `../frames/index/${i+1}.png`),
+            'middle': Array.from({length: 7}, (_, i) => `../frames/middle/${i+1}.png`),
+            'ring': Array.from({length: 7}, (_, i) => `../frames/ring/${i+1}.png`),
+            'pinky': Array.from({length: 7}, (_, i) => `../frames/pinky/${i+1}.png`)
         };
         
-        // Preload all images for smoother animations
+        // Preload critical images immediately
+        function preloadCriticalImages() {
+            // Preload base image and first frame of ring finger animation
+            const criticalImages = [
+                '../frames/basetransparent.png',
+                '../frames/ring/1.png'
+            ];
+            
+            criticalImages.forEach(src => {
+                const img = new Image();
+                img.src = src;
+            });
+        }
+        
+        // Call preload immediately
+        preloadCriticalImages();
+        
+        // Modify preloadImages to load in batches with priority
         const preloadImages = () => {
-            for (const finger in fingerFrames) {
-                fingerFrames[finger].forEach(src => {
-                    const img = new Image();
-                    img.src = src;
-                });
-            }
+            // First load only the ring finger frames (used in initial animation)
+            const ringFrames = fingerFrames['ring'];
+            ringFrames.forEach(src => {
+                const img = new Image();
+                img.src = src;
+            });
+            
+            // Then load the rest of the frames asynchronously
+            setTimeout(() => {
+                for (const finger in fingerFrames) {
+                    if (finger !== 'ring') { // Skip ring finger as it's already loaded
+                        fingerFrames[finger].forEach(src => {
+                            const img = new Image();
+                            img.src = src;
+                        });
+                    }
+                }
+            }, 500); // Delay loading of non-critical frames
         };
-        
-        // Call preload on page load
-        preloadImages();
         
         // Function to animate a finger bending or extending
         function animateFinger(fingerName, direction, callback) {
@@ -319,28 +407,37 @@
             }, 60);
         }
         
-        // Function to animate just the middle finger on page load
+        // Modify the animateMiddleFingerOnLoad function to ensure icons are positioned before showing
         function animateMiddleFingerOnLoad() {
             // Hide all finger icons initially
             document.querySelectorAll('.finger-icon').forEach(icon => {
                 icon.style.opacity = '0';
             });
             
-            // Close the middle finger
-            animateFinger('ring', 1, () => {
-                // Open the finger
-                animateFinger('ring', -1, () => {
-                    // After the finger opens, fade in the icons
-                    setTimeout(() => {
-                        document.querySelectorAll('.finger-icon').forEach(icon => {
-                            icon.style.opacity = '1';
-                        });
-                    }, 420); // 7 frames × 60ms = 420ms to open
+            // Position icons before animation starts
+            positionFingerIcons();
+            
+            // Start animation sooner
+            setTimeout(() => {
+                // Close the ring finger
+                animateFinger('ring', 1, () => {
+                    // Open the finger
+                    animateFinger('ring', -1, () => {
+                        // Position icons again before showing them
+                        positionFingerIcons();
+                        
+                        // After the finger opens, fade in the icons
+                        setTimeout(() => {
+                            document.querySelectorAll('.finger-icon').forEach(icon => {
+                                icon.style.opacity = '1';
+                            });
+                        }, 100);
+                    });
                 });
-            });
+            }, 100); // Reduced from original delay
         }
         
-        // Function to update the hand image based on current finger states
+        // Optimize the updateHandImage function
         function updateHandImage() {
             // Create a canvas to composite the images
             const canvas = document.createElement('canvas');
@@ -357,7 +454,7 @@
                 
                 if (allFingersInBasePosition) {
                     // If all fingers are in base position, just use the base image
-                    base.src = './frames/basetransparent.png';
+                    base.src = '../frames/basetransparent.png';
                     return;
                 }
                 
@@ -366,32 +463,43 @@
                     let fingersToLoad = 0;
                     let fingersLoaded = 0;
                     
-                    for (const finger in fingers) {
+                    // Draw fingers in reverse order to ensure proper layering
+                    const fingerNames = Object.keys(fingers);
+                    for (let i = fingerNames.length - 1; i >= 0; i--) {
+                        const finger = fingerNames[i];
                         if (fingers[finger].currentFrame > 0) {
                             fingersToLoad++;
                             const fingerImg = new Image();
-                            fingerImg.onload = () => {
+                            // Use cached images when possible
+                            fingerImg.src = fingerFrames[finger][fingers[finger].currentFrame];
+                            
+                            // Only draw if image is loaded
+                            if (fingerImg.complete) {
                                 ctx.drawImage(fingerImg, 0, 0);
                                 fingersLoaded++;
-                                
-                                if (fingersLoaded === fingersToLoad) {
-                                    // Update the displayed image
-                                    base.src = canvas.toDataURL('image/png');
-                                }
-                            };
-                            fingerImg.src = fingerFrames[finger][fingers[finger].currentFrame];
+                            } else {
+                                fingerImg.onload = () => {
+                                    ctx.drawImage(fingerImg, 0, 0);
+                                    fingersLoaded++;
+                                    
+                                    if (fingersLoaded === fingersToLoad) {
+                                        // Update the displayed image
+                                        base.src = canvas.toDataURL('image/png');
+                                    }
+                                };
+                            }
                         }
                     }
                     
-                    // If no fingers to load, just display base
-                    if (fingersToLoad === 0) {
+                    // If all images were already loaded or no fingers to load
+                    if (fingersLoaded === fingersToLoad) {
                         base.src = canvas.toDataURL('image/png');
                     }
                 };
                 
                 drawFingers();
             };
-            baseImg.src = './frames/basetransparent.png';
+            baseImg.src = '../frames/basetransparent.png';
         }
 
         // Check if user is on mobile
@@ -404,6 +512,7 @@
             const fingerName = icon.id.split('-')[0];
             const parentLink = icon.closest('a');
             const href = parentLink.getAttribute('href');
+
             
             // For desktop: use mouseover/mouseout
             if (!isMobile()) {
@@ -424,18 +533,57 @@
                         // After finger closes, animate opening
                         animateFinger(fingerName, -1, () => {
                             // After animation completes, navigate to the link
-                            window.open(href, '_blank');
+                            window.location.href = href;
                         });
                     });
                 });
             }
         });
         
-        // Start the middle finger animation when the page is fully loaded
-        window.addEventListener('load', () => {
-            // Wait a short moment to ensure everything is ready
-            setTimeout(animateMiddleFingerOnLoad, 10);
+        // Start loading critical assets immediately
+        window.addEventListener('DOMContentLoaded', () => {
+            // Start preloading images immediately
+            preloadImages();
+            
+            // Start the animation as soon as possible
+            animateMiddleFingerOnLoad();
         });
+
+        // Function to handle video autoplay issues on iOS
+        function handleVideoAutoplay() {
+            const video = document.getElementById('background-video');
+            
+            // Don't try to play video on mobile
+            if (isMobile()) {
+                video.style.display = 'none';
+                return;
+            }
+            
+            // Try to play the video on desktop
+            const playPromise = video.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    // Auto-play was prevented
+                    // Add event listeners to play video after user interaction
+                    document.body.addEventListener('touchstart', () => {
+                        video.play();
+                    }, { once: true });
+                    
+                    document.body.addEventListener('click', () => {
+                        video.play();
+                    }, { once: true });
+                });
+            }
+        }
+        
+        // Call the function when the page loads
+        window.addEventListener('load', handleVideoAutoplay);
+
+        // Make sure base image is loaded before positioning
+        base.onload = function() {
+            positionFingerIcons();
+        };
     </script>
 </body>
 </html>
