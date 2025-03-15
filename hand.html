@@ -123,12 +123,22 @@
             width: 500px;
             /* height: 100%; */
         }
+
+        #title {
+            position: absolute;
+            transform: translateX(-50%);
+            left: 50%;
+            bottom: 0;
+            width: 100%;
+            max-width: 300px;
+        }
     </style>
 </head>
 <body>
     <video id="background-video" autoplay loop muted>  
         <source src="./clips/om9.mp4" type="video/mp4">
     </video>
+
 
     <!-- <video id="red" autoplay loop muted>  
         <source src="./clips/om7.mp4" type="video/mp4">
@@ -138,6 +148,7 @@
         <source src="./clips/om8.mp4" type="video/mp4">
     </video> -->
 
+    <img id="title" src="./assets/title.png" alt="title">
     <div id="hand-container">
         <img id="base" src="./frames/basetransparent.png" alt="hand">
         
