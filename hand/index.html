@@ -16,14 +16,14 @@
     <meta property="og:url" content="https://whiff.pcotandy.org/">
     <meta property="og:title" content="The Whiff - Old Maybe">
     <meta property="og:description" content="The Whiff - A new album by Old Maybe. Released via the People's Coalition of Tandy">
-    <meta property="og:image" content="https://whiff.pcotandy.org/assets/title.png">
+    <meta property="og:image" content="https://whiff.pcotandy.org/assets/titledither.png">
     
     <!-- Twitter metadata -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="https://whiff.pcotandy.org/">
     <meta name="twitter:title" content="The Whiff - Old Maybe">
     <meta name="twitter:description" content="The Whiff - A new album by Old Maybe. Released via the People's Coalition of Tandy">
-    <meta name="twitter:image" content="https://whiff.pcotandy.org/assets/title.png">
+    <meta name="twitter:image" content="https://whiff.pcotandy.org/assets/titledither.png">
     
     <!-- Favicon links -->
     <link rel="icon" href="../assets/favicon/favicon.ico" type="image/x-icon">
@@ -209,7 +209,7 @@
         <source src="../clips/om9.mp4" type="video/mp4">
     </video>
 
-    <img id="title" src="../assets/title.png" alt="title">
+    <img id="title" src="../assets/titledither.png" alt="title">
     <div id="hand-container">
         <img id="base" src="../frames/basetransparent.png" alt="hand">
         
@@ -326,88 +326,152 @@
             'pinky': Array.from({length: 7}, (_, i) => `../frames/pinky/${i+1}.png`)
         };
         
-        // Preload critical images immediately
-        function preloadCriticalImages() {
-            // Preload base image and first frame of ring finger animation
-            const criticalImages = [
-                '../frames/basetransparent.png',
-                '../frames/ring/1.png'
-            ];
-            
-            criticalImages.forEach(src => {
-                const img = new Image();
-                img.src = src;
-            });
-        }
+        // Track loaded images
+        const loadedImages = {};
         
-        // Call preload immediately
-        preloadCriticalImages();
-        
-        // Modify preloadImages to load in batches with priority
-        const preloadImages = () => {
-            // First load only the ring finger frames (used in initial animation)
-            const ringFrames = fingerFrames['ring'];
-            ringFrames.forEach(src => {
-                const img = new Image();
-                img.src = src;
-            });
+        // Improved preloading with tracking and callbacks
+        function preloadImages(imageList, callback) {
+            let loadedCount = 0;
+            const totalImages = imageList.length;
             
-            // Then load the rest of the frames asynchronously
-            setTimeout(() => {
-                for (const finger in fingerFrames) {
-                    if (finger !== 'ring') { // Skip ring finger as it's already loaded
-                        fingerFrames[finger].forEach(src => {
-                            const img = new Image();
-                            img.src = src;
-                        });
+            // If no images to load, call callback immediately
+            if (totalImages === 0 && callback) {
+                callback();
+                return;
+            }
+            
+            imageList.forEach(src => {
+                // Skip if already loaded
+                if (loadedImages[src]) {
+                    loadedCount++;
+                    if (loadedCount === totalImages && callback) {
+                        callback();
                     }
-                }
-            }, 500); // Delay loading of non-critical frames
-        };
-        
-        // Function to animate a finger bending or extending
-        function animateFinger(fingerName, direction, callback) {
-            // Stop any existing animations for ALL fingers
-            for (const finger in fingers) {
-                if (fingers[finger].animationInterval) {
-                    clearInterval(fingers[finger].animationInterval);
-                    fingers[finger].animating = false;
+                    return;
                 }
                 
-                // Reset all other fingers to base position if we're starting a new animation
-                if (direction > 0 && finger !== fingerName) {
-                    fingers[finger].currentFrame = 0;
+                const img = new Image();
+                
+                img.onload = () => {
+                    loadedImages[src] = true;
+                    loadedCount++;
+                    if (loadedCount === totalImages && callback) {
+                        callback();
+                    }
+                };
+                
+                img.onerror = () => {
+                    console.warn(`Failed to load image: ${src}`);
+                    loadedCount++;
+                    if (loadedCount === totalImages && callback) {
+                        callback();
+                    }
+                };
+                
+                img.src = src;
+            });
+            
+            // Set a safety timeout in case images don't load
+            setTimeout(() => {
+                if (loadedCount < totalImages && callback) {
+                    console.warn('Image preloading timed out');
+                    callback();
+                }
+            }, 3000);
+        }
+        
+        // Preload critical images for initial animation
+        function preloadCriticalImages(callback) {
+            const criticalImages = [
+                '../frames/basetransparent.png',
+                ...fingerFrames['ring'] // All ring finger frames are critical
+            ];
+            
+            preloadImages(criticalImages, callback);
+        }
+        
+        // Function to animate a finger bending or extending with improved reliability
+        function animateFinger(fingerName, direction, callback) {
+            // Clear any existing animation for this finger
+            if (fingers[fingerName].animationInterval) {
+                clearInterval(fingers[fingerName].animationInterval);
+            }
+            
+            // Reset all other fingers to base position if we're starting a new animation
+            if (direction > 0) {
+                for (const finger in fingers) {
+                    if (finger !== fingerName) {
+                        fingers[finger].currentFrame = 0;
+                        if (fingers[finger].animationInterval) {
+                            clearInterval(fingers[finger].animationInterval);
+                            fingers[finger].animating = false;
+                        }
+                    }
                 }
             }
             
             // Set animating state to true for this finger
             fingers[fingerName].animating = true;
             
-            // Start the animation interval
-            fingers[fingerName].animationInterval = setInterval(() => {
-                // Update the frame based on direction (1 = close, -1 = open)
-                fingers[fingerName].currentFrame += direction;
-                
-                // Check bounds
-                if ((direction > 0 && fingers[fingerName].currentFrame >= 6) || 
-                    (direction < 0 && fingers[fingerName].currentFrame <= 0)) {
-                    // Stop at limits
-                    fingers[fingerName].currentFrame = Math.max(0, Math.min(6, fingers[fingerName].currentFrame));
-                    clearInterval(fingers[fingerName].animationInterval);
-                    fingers[fingerName].animating = false;
-                    
-                    // Execute callback if provided and animation is complete
-                    if (typeof callback === 'function') {
-                        setTimeout(() => callback(), 50); // Small delay to ensure animation completes
+            // Preload all frames for this finger before starting animation
+            const framesToLoad = [];
+            const startFrame = fingers[fingerName].currentFrame;
+            const endFrame = direction > 0 ? 6 : 0;
+            
+            // Determine which frames need to be loaded
+            for (let i = startFrame; direction > 0 ? i <= endFrame : i >= endFrame; i += direction) {
+                framesToLoad.push(fingerFrames[fingerName][i]);
+            }
+            
+            // Preload the frames then start animation
+            preloadImages(framesToLoad, () => {
+                // Set a safety timeout to reset finger if animation gets stuck
+                const safetyTimeout = setTimeout(() => {
+                    if (fingers[fingerName].animating) {
+                        console.warn(`Animation for ${fingerName} timed out, resetting`);
+                        clearInterval(fingers[fingerName].animationInterval);
+                        fingers[fingerName].currentFrame = 0;
+                        fingers[fingerName].animating = false;
+                        updateHandImage();
+                        
+                        // Show icons if they're still hidden
+                        document.querySelectorAll('.finger-icon').forEach(icon => {
+                            icon.style.opacity = '1';
+                        });
+                        
+                        if (typeof callback === 'function') {
+                            callback();
+                        }
                     }
-                }
+                }, 2000); // 2 second safety timeout
                 
-                // Update the hand image to composite of base and current finger frame
-                updateHandImage();
-            }, 60);
+                // Start the animation interval
+                fingers[fingerName].animationInterval = setInterval(() => {
+                    // Update the frame based on direction (1 = close, -1 = open)
+                    fingers[fingerName].currentFrame += direction;
+                    
+                    // Check bounds
+                    if ((direction > 0 && fingers[fingerName].currentFrame >= 6) || 
+                        (direction < 0 && fingers[fingerName].currentFrame <= 0)) {
+                        // Stop at limits
+                        fingers[fingerName].currentFrame = Math.max(0, Math.min(6, fingers[fingerName].currentFrame));
+                        clearInterval(fingers[fingerName].animationInterval);
+                        fingers[fingerName].animating = false;
+                        clearTimeout(safetyTimeout); // Clear safety timeout
+                        
+                        // Execute callback if provided and animation is complete
+                        if (typeof callback === 'function') {
+                            setTimeout(() => callback(), 50); // Small delay to ensure animation completes
+                        }
+                    }
+                    
+                    // Update the hand image to composite of base and current finger frame
+                    updateHandImage();
+                }, isMobile() ? 80 : 60); // Slightly slower animation on mobile
+            });
         }
         
-        // Modify the animateMiddleFingerOnLoad function to ensure icons are positioned before showing
+        // Improved animation sequence for initial load
         function animateMiddleFingerOnLoad() {
             // Hide all finger icons initially
             document.querySelectorAll('.finger-icon').forEach(icon => {
@@ -417,28 +481,41 @@
             // Position icons before animation starts
             positionFingerIcons();
             
-            // Start animation sooner
-            setTimeout(() => {
-                // Close the ring finger
-                animateFinger('ring', 1, () => {
-                    // Open the finger
-                    animateFinger('ring', -1, () => {
-                        // Position icons again before showing them
-                        positionFingerIcons();
-                        
-                        // After the finger opens, fade in the icons
-                        setTimeout(() => {
-                            document.querySelectorAll('.finger-icon').forEach(icon => {
-                                icon.style.opacity = '1';
-                            });
-                        }, 100);
+            // Make sure base image is loaded and visible before starting animation
+            const baseImg = new Image();
+            baseImg.onload = () => {
+                // Start animation after base image is loaded
+                setTimeout(() => {
+                    // Close the ring finger
+                    animateFinger('ring', 1, () => {
+                        // Open the finger
+                        animateFinger('ring', -1, () => {
+                            // Position icons again before showing them
+                            positionFingerIcons();
+                            
+                            // After the finger opens, fade in the icons
+                            setTimeout(() => {
+                                document.querySelectorAll('.finger-icon').forEach(icon => {
+                                    icon.style.opacity = '1';
+                                });
+                            }, 100);
+                        });
                     });
-                });
-            }, 300); // Reduced from original delay
+                }, isMobile() ? 1500 : 1000); // Longer delay on mobile
+            };
+            baseImg.src = '../frames/basetransparent.png';
         }
         
-        // Optimize the updateHandImage function
+        // Improved updateHandImage function with better error handling
         function updateHandImage() {
+            // If all fingers are in base position, just use the base image
+            const allFingersInBasePosition = Object.values(fingers).every(finger => finger.currentFrame === 0);
+            
+            if (allFingersInBasePosition) {
+                base.src = '../frames/basetransparent.png';
+                return;
+            }
+            
             // Create a canvas to composite the images
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
@@ -449,56 +526,55 @@
                 canvas.width = baseImg.width;
                 canvas.height = baseImg.height;
                 
-                // Only draw the base image if all fingers are in base position
-                const allFingersInBasePosition = Object.values(fingers).every(finger => finger.currentFrame === 0);
+                // Track which fingers need to be drawn
+                const fingersToRender = [];
+                for (const finger in fingers) {
+                    if (fingers[finger].currentFrame > 0) {
+                        fingersToRender.push(finger);
+                    }
+                }
                 
-                if (allFingersInBasePosition) {
-                    // If all fingers are in base position, just use the base image
-                    base.src = '../frames/basetransparent.png';
+                // If no fingers to render, just use base image
+                if (fingersToRender.length === 0) {
+                    base.src = canvas.toDataURL('image/png');
                     return;
                 }
                 
-                // Function to draw each finger that's not in base position
-                const drawFingers = () => {
-                    let fingersToLoad = 0;
-                    let fingersLoaded = 0;
-                    
-                    // Draw fingers in reverse order to ensure proper layering
-                    const fingerNames = Object.keys(fingers);
-                    for (let i = fingerNames.length - 1; i >= 0; i--) {
-                        const finger = fingerNames[i];
-                        if (fingers[finger].currentFrame > 0) {
-                            fingersToLoad++;
-                            const fingerImg = new Image();
-                            // Use cached images when possible
-                            fingerImg.src = fingerFrames[finger][fingers[finger].currentFrame];
-                            
-                            // Only draw if image is loaded
-                            if (fingerImg.complete) {
-                                ctx.drawImage(fingerImg, 0, 0);
-                                fingersLoaded++;
-                            } else {
-                                fingerImg.onload = () => {
-                                    ctx.drawImage(fingerImg, 0, 0);
-                                    fingersLoaded++;
-                                    
-                                    if (fingersLoaded === fingersToLoad) {
-                                        // Update the displayed image
-                                        base.src = canvas.toDataURL('image/png');
-                                    }
-                                };
-                            }
-                        }
-                    }
-                    
-                    // If all images were already loaded or no fingers to load
-                    if (fingersLoaded === fingersToLoad) {
+                // Function to draw each finger
+                let fingersLoaded = 0;
+                
+                const drawNextFinger = (index) => {
+                    if (index >= fingersToRender.length) {
+                        // All fingers drawn, update the displayed image
                         base.src = canvas.toDataURL('image/png');
+                        return;
                     }
+                    
+                    const finger = fingersToRender[index];
+                    const frame = fingers[finger].currentFrame;
+                    const fingerImg = new Image();
+                    
+                    fingerImg.onload = () => {
+                        ctx.drawImage(fingerImg, 0, 0);
+                        drawNextFinger(index + 1);
+                    };
+                    
+                    fingerImg.onerror = () => {
+                        console.warn(`Failed to load finger frame: ${fingerFrames[finger][frame]}`);
+                        drawNextFinger(index + 1);
+                    };
+                    
+                    fingerImg.src = fingerFrames[finger][frame];
                 };
                 
-                drawFingers();
+                // Start drawing fingers
+                drawNextFinger(0);
             };
+            
+            baseImg.onerror = () => {
+                console.warn('Failed to load base image');
+            };
+            
             baseImg.src = '../frames/basetransparent.png';
         }
 
@@ -542,11 +618,17 @@
         
         // Start loading critical assets immediately
         window.addEventListener('DOMContentLoaded', () => {
-            // Start preloading images immediately
-            preloadImages();
-            
-            // Start the animation as soon as possible
-            animateMiddleFingerOnLoad();
+            // Preload critical images first, then start animation
+            preloadCriticalImages(() => {
+                // Start the animation only after critical images are loaded
+                animateMiddleFingerOnLoad();
+                
+                // Load remaining images in the background
+                setTimeout(() => {
+                    const allFrames = [].concat(...Object.values(fingerFrames));
+                    preloadImages(allFrames);
+                }, 500);
+            });
         });
 
         // Function to handle video autoplay issues on iOS
