@@ -51,6 +51,7 @@
             font-weight: bold;
             z-index: 10;
             transform: translate(-50%, -50%);
+            filter: brightness(0.8);
             opacity: 0; /* Start with icons invisible */
             transition: opacity 0.5s ease, transform 0.3s ease; /* Add transform to transition */
         }
@@ -62,7 +63,7 @@
 
         .icon-text {
             color: white;
-            font-size: 14px;
+            font-size: 18px;
             filter: blur(0.5px);
             margin-top: 5px;
             text-align: center;
@@ -97,9 +98,46 @@
             left: 55%;
             top: 58%;
         }
+
+        #background-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #red {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 500px;
+            /* height: 100%; */
+        }
+
+        #jazz {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 500px;
+            /* height: 100%; */
+        }
     </style>
 </head>
 <body>
+    <video id="background-video" autoplay loop muted>  
+        <source src="./clips/om9.mp4" type="video/mp4">
+    </video>
+
+    <!-- <video id="red" autoplay loop muted>  
+        <source src="./clips/om7.mp4" type="video/mp4">
+    </video>
+
+    <video id="jazz" autoplay loop muted>  
+        <source src="./clips/om8.mp4" type="video/mp4">
+    </video> -->
+
     <div id="hand-container">
         <img id="base" src="./frames/basetransparent.png" alt="hand">
         
@@ -107,10 +145,10 @@
         <a href="https://tandy.bandcamp.com/album/the-whiff" target="_blank">
             <div id="thumb-icon" class="finger-icon">
                 <img width="40px" src="./assets/cd.png" alt="thumb">
-                <div class="icon-text">Album</div>
+                <div class="icon-text">CD</div>
             </div>
         </a>
-        <a href="www.youtube.com/watch?v=tLgDpKo6q5o" target="_blank">
+        <a href="https://www.youtube.com/watch?v=tLgDpKo6q5o" target="_blank">
             <div id="index-icon" class="finger-icon">
                 <img width="40px" src="./assets/yt.png" alt="index">
                 <div class="icon-text">YouTube</div>
@@ -260,8 +298,8 @@
                     fingers[fingerName].animating = false;
                     
                     // Execute callback if provided and animation is complete
-                    if (callback && !fingers[fingerName].animating) {
-                        callback();
+                    if (typeof callback === 'function') {
+                        setTimeout(() => callback(), 50); // Small delay to ensure animation completes
                     }
                 }
                 
