@@ -161,10 +161,24 @@
             object-fit: cover;
         }
 
-        /* Hide background video on mobile devices */
+        #background-gif {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none; /* Hidden by default, shown on mobile */
+        }
+
+        /* Show GIF background on mobile devices instead of hiding video */
         @media (max-width: 767px) {
             #background-video {
-                /* display: none; */
+                display: none;
+            }
+            
+            #background-gif {
+                display: block;
             }
             
             /* Optional: Add a solid background color for mobile */
@@ -217,13 +231,15 @@
         <source src="../clips/om9.mp4" type="video/mp4">
     </video>
 
+    <img id="background-gif" src="../clips/bg.gif" alt="background animation">
+
     <img id="title" src="../assets/titledither.png" alt="title">
     <div id="hand-container">
         <img id="base" src="../frames/basetransparent.png" alt="hand">
         
         <!-- Finger icons -->
-        <a href="https://tandy.bandcamp.com/album/the-whiff" target="_blank">
-            <div id="middle-icon" class="finger-icon">
+        <a href="https://www.youtube.com/watch?v=DoS-27AOqMA" target="_blank">
+            <div id="thumb-icon" class="finger-icon">
                 <img width="50px" src="../assets/ipod.png" alt="thumb">
                 <!-- <div class="icon-text">ghiz</div> -->
             </div>
@@ -247,7 +263,7 @@
             </div>
         </a>
         <a href="https://pcotandy.org" target="_blank">
-            <div id="thumb-icon" class="finger-icon">
+            <div id="middle-icon" class="finger-icon">
                 <img width="40px" src="../assets/TandyLogo.png" alt="pinky">
                 <!-- <div class="icon-text">LgL</div> -->
             </div>
@@ -653,10 +669,12 @@
         // Function to handle video autoplay issues on iOS
         function handleVideoAutoplay() {
             const video = document.getElementById('background-video');
+            const gifBackground = document.getElementById('background-gif');
             
-            // Don't try to play video on mobile
+            // Use GIF on mobile
             if (isMobile()) {
                 video.style.display = 'none';
+                gifBackground.style.display = 'block';
                 return;
             }
             
@@ -666,12 +684,20 @@
             if (playPromise !== undefined) {
                 playPromise.catch(error => {
                     // Auto-play was prevented
+                    console.log("Video autoplay prevented, falling back to GIF");
+                    video.style.display = 'none';
+                    gifBackground.style.display = 'block';
+                    
                     // Add event listeners to play video after user interaction
                     document.body.addEventListener('touchstart', () => {
+                        video.style.display = 'block';
+                        gifBackground.style.display = 'none';
                         video.play();
                     }, { once: true });
                     
                     document.body.addEventListener('click', () => {
+                        video.style.display = 'block';
+                        gifBackground.style.display = 'none';
                         video.play();
                     }, { once: true });
                 });
