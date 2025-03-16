@@ -38,13 +38,20 @@
             src: url("../assets/shin.otf");
         }
 
+        @font-face {
+            font-family: "weird";
+            src: url("../assets/weird2.ttf") format("truetype");
+        }
+
         body {
             margin: 0;
             padding: 0;
             overflow: hidden;
             background-color: #000;
-            font-family: "shin";
+            font-family: "weird";
+            /* filter: brightness(2) contrast(1.2) saturate(1.2); */
         }
+
 
         #hand-container {
             position: relative;
@@ -68,6 +75,7 @@
             width: 40px;
             /* height: 40px; */
             border-radius: 50%;
+            font-family: "weird";
             /* filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.85)); */
             /* padding: 10px; */
             /* background-color: rgb(255, 255, 255); */
@@ -81,7 +89,7 @@
             transform: translate(-50%, -50%);
             filter: brightness(0.8);
             opacity: 0; /* Start with icons invisible */
-            transition: opacity 0.3s ease, transform 0.3s ease; /* Add transform to transition */
+            transition: opacity 0.6s ease, transform 0.3s ease; /* Add transform to transition */
         }
 
         .finger-icon:hover {
@@ -91,13 +99,13 @@
 
         .icon-text {
             color: white;
-            font-size: 18px;
-            filter: blur(0.5px);
+            font-size: 16px;
+            /* filter: blur(0.5px); */
             margin-top: 5px;
             text-align: center;
             /* text-shadow: 1px 1px 3px black; */
-            font-family: Arial, sans-serif;
-            -webkit-text-stroke: 1px black;
+            font-family: "weird";
+            /* -webkit-text-stroke: 1px black; */
             font-weight: bold;
         }
 
@@ -112,7 +120,7 @@
             }
             
             .icon-text {
-                font-size: 14px;
+                font-size: 10px;
                 margin-top: 3px;
                 -webkit-text-stroke: 0 black;
             }
@@ -215,33 +223,33 @@
         
         <!-- Finger icons -->
         <a href="https://tandy.bandcamp.com/album/the-whiff" target="_blank">
-            <div id="thumb-icon" class="finger-icon">
-                <img width="40px" src="../assets/cd.png" alt="thumb">
-                <div class="icon-text">CD</div>
+            <div id="ring-icon" class="finger-icon">
+                <img width="50px" src="../assets/cd.png" alt="thumb">
+                <!-- <div class="icon-text">ghiz</div> -->
             </div>
         </a>
         <a href="https://www.youtube.com/watch?v=tLgDpKo6q5o" target="_blank">
             <div id="index-icon" class="finger-icon">
-                <img width="40px" src="../assets/yt.png" alt="index">
-                <div class="icon-text">YouTube</div>
+                <img width="50px" src="../assets/vhs2.png" alt="index">
+                <!-- <div class="icon-text">PT</div> -->
             </div>
         </a>
         <a href="https://www.instagram.com/oldmaybe_/" target="_blank">
-            <div id="middle-icon" class="finger-icon">
-                <img width="40px" src="../assets/insta.png" alt="ring">
-                <div class="icon-text">Insta</div>
+            <div id="pinky-icon" class="finger-icon">
+                <img width="50px" src="../assets/i.png" alt="ring">
+                <!-- <div class="icon-text">AhA</div> -->
             </div>
         </a>
-        <a href="https://tandy.bandcamp.com/album/the-whiff" target="_blank">
-            <div id="ring-icon" class="finger-icon">
-                <img width="40px" src="../assets/bc.png" alt="middle">
-                <div class="icon-text">Bandcamp</div>
+        <a href="https://www.youtube.com/watch?v=DoS-27AOqMA" target="_blank">
+            <div id="thumb-icon" class="finger-icon">
+                <img width="40px" src="../assets/yt.png" alt="middle">
+                <!-- <div class="icon-text">CA</div> -->
             </div>
         </a>
         <a href="https://pcotandy.org" target="_blank">
-            <div id="pinky-icon" class="finger-icon">
+            <div id="middle-icon" class="finger-icon">
                 <img width="40px" src="../assets/TandyLogo.png" alt="pinky">
-                <div class="icon-text">Tandy</div>
+                <!-- <div class="icon-text">LgL</div> -->
             </div>
         </a>
     </div>
@@ -488,18 +496,29 @@
                 setTimeout(() => {
                     // Close the ring finger
                     animateFinger('ring', 1, () => {
-                        // Open the finger
-                        animateFinger('ring', -1, () => {
-                            // Position icons again before showing them
-                            positionFingerIcons();
-                            
-                            // After the finger opens, fade in the icons
-                            setTimeout(() => {
-                                document.querySelectorAll('.finger-icon').forEach(icon => {
-                                    icon.style.opacity = '1';
-                                });
-                            }, 100);
-                        });
+                        // Show only the ring finger icon while finger is down
+                        const ringIcon = document.getElementById('ring-icon');
+                        if (ringIcon) {
+                            ringIcon.style.opacity = '1';
+                        }
+                        
+                        // Wait a moment with the finger down and icon visible
+                        setTimeout(() => {
+                            // Open the finger
+                            animateFinger('ring', -1, () => {
+                                // Position icons again before showing them
+                                positionFingerIcons();
+                                
+                                // After the finger opens, fade in the rest of the icons
+                                setTimeout(() => {
+                                    document.querySelectorAll('.finger-icon').forEach(icon => {
+                                        if (icon.id !== 'ring-icon') { // Skip ring icon as it's already visible
+                                            icon.style.opacity = '1';
+                                        }
+                                    });
+                                }, 100);
+                            });
+                        }, 500); // Wait with finger down and icon visible
                     });
                 }, isMobile() ? 1500 : 1000); // Longer delay on mobile
             };
