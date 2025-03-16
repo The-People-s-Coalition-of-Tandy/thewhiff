@@ -161,24 +161,10 @@
             object-fit: cover;
         }
 
-        #background-gif {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: none; /* Hidden by default, shown on mobile */
-        }
-
-        /* Show GIF background on mobile devices instead of hiding video */
+        /* Hide video on mobile devices */
         @media (max-width: 767px) {
             #background-video {
                 display: none;
-            }
-            
-            #background-gif {
-                display: block;
             }
             
             /* Optional: Add a solid background color for mobile */
@@ -230,8 +216,6 @@
     <video id="background-video" autoplay loop muted playsinline>  
         <source src="../clips/om9.mp4" type="video/mp4">
     </video>
-
-    <img id="background-gif" src="../clips/bg.gif" alt="background animation">
 
     <img id="title" src="../assets/titledither.png" alt="title">
     <div id="hand-container">
@@ -669,12 +653,10 @@
         // Function to handle video autoplay issues on iOS
         function handleVideoAutoplay() {
             const video = document.getElementById('background-video');
-            const gifBackground = document.getElementById('background-gif');
             
-            // Use GIF on mobile
+            // Hide video on mobile
             if (isMobile()) {
                 video.style.display = 'none';
-                gifBackground.style.display = 'block';
                 return;
             }
             
@@ -684,20 +666,14 @@
             if (playPromise !== undefined) {
                 playPromise.catch(error => {
                     // Auto-play was prevented
-                    console.log("Video autoplay prevented, falling back to GIF");
-                    video.style.display = 'none';
-                    gifBackground.style.display = 'block';
+                    console.log("Video autoplay prevented");
                     
                     // Add event listeners to play video after user interaction
                     document.body.addEventListener('touchstart', () => {
-                        video.style.display = 'block';
-                        gifBackground.style.display = 'none';
                         video.play();
                     }, { once: true });
                     
                     document.body.addEventListener('click', () => {
-                        video.style.display = 'block';
-                        gifBackground.style.display = 'none';
                         video.play();
                     }, { once: true });
                 });
