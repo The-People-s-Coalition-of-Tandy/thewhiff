@@ -89,7 +89,19 @@
             transform: translate(-50%, -50%);
             filter: brightness(0.8);
             opacity: 0; /* Start with icons invisible */
-            transition: opacity 0.6s ease, transform 0.3s ease; /* Add transform to transition */
+            transition: opacity 0.6s ease, transform 0.3s ease, filter 0.5s ease; /* Add filter to transition */
+        }
+
+        /* Glowing effect for active icon */
+        .finger-icon.active {
+            filter: brightness(1.5) drop-shadow(0 0 15px rgba(255, 255, 255, 0.8));
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0% { filter: brightness(1.2) drop-shadow(0 0 10px rgba(255, 255, 255, 0.7)); }
+            50% { filter: brightness(1.8) drop-shadow(0 0 20px rgba(255, 255, 255, 0.9)); }
+            100% { filter: brightness(1.2) drop-shadow(0 0 10px rgba(255, 255, 255, 0.7)); }
         }
 
         .finger-icon:hover {
@@ -222,7 +234,7 @@
         <img id="base" src="../frames/basetransparent.png" alt="hand">
         
         <!-- Finger icons -->
-        <a href="https://www.youtube.com/watch?v=DoS-27AOqMA" target="_blank">
+        <a href="https://tickets.venuepilot.com/e/130042" target="_blank">
             <div id="thumb-icon" class="finger-icon">
                 <img width="50px" src="../assets/ipod.png" alt="thumb">
                 <!-- <div class="icon-text">ghiz</div> -->
@@ -398,8 +410,65 @@
             preloadImages(criticalImages, callback);
         }
         
-        // Function to animate a finger bending or extending with improved reliability
+        // Track if any finger is currently animating
+        let isAnimating = false;
+        let activeFingerIcon = null;
+
+        // Function to highlight active icon and fade others
+        function setActiveIcon(fingerName) {
+            // Get all finger icons
+            const allIcons = document.querySelectorAll('.finger-icon');
+            
+            // Find the active icon
+            activeFingerIcon = document.getElementById(`${fingerName}-icon`);
+            
+            // Add active class to the selected icon
+            if (activeFingerIcon) {
+                activeFingerIcon.classList.add('active');
+                activeFingerIcon.style.opacity = '1';
+            }
+            
+            // Fade out other icons
+            allIcons.forEach(icon => {
+                if (icon !== activeFingerIcon) {
+                    icon.style.opacity = '0';
+                }
+            });
+        }
+
+        // Function to reset all icons to normal state
+        function resetIcons() {
+            const allIcons = document.querySelectorAll('.finger-icon');
+            
+            // Remove active class from previously active icon
+            if (activeFingerIcon) {
+                activeFingerIcon.classList.remove('active');
+                activeFingerIcon = null;
+            }
+            
+            // Show all icons
+            allIcons.forEach(icon => {
+                icon.style.opacity = '1';
+            });
+        }
+
+        // Modified animateFinger function to handle icon states
         function animateFinger(fingerName, direction, callback) {
+            // If already animating on mobile, prevent starting a new animation
+            if (isMobile() && isAnimating && direction > 0) {
+                return;
+            }
+
+            // Set global animating state if closing finger
+            if (direction > 0) {
+                isAnimating = true;
+                
+                // Highlight active icon and fade others
+                if (isMobile()) {
+                    setActiveIcon(fingerName);
+                }
+            }
+
             // Clear any existing animation for this finger
             if (fingers[fingerName].animationInterval) {
                 clearInterval(fingers[fingerName].animationInterval);
@@ -443,9 +512,10 @@
                         updateHandImage();
                         
                         // Show icons if they're still hidden
-                        document.querySelectorAll('.finger-icon').forEach(icon => {
-                            icon.style.opacity = '1';
-                        });
+                        resetIcons();
+                        
+                        // Reset global animating state
+                        isAnimating = false;
                         
                         if (typeof callback === 'function') {
                             callback();
@@ -466,6 +536,16 @@
                         clearInterval(fingers[fingerName].animationInterval);
                         fingers[fingerName].animating = false;
                         clearTimeout(safetyTimeout); // Clear safety timeout
+                        
+                        // If opening finger (direction < 0), reset global animating state
+                        if (direction < 0) {
+                            isAnimating = false;
+                            
+                            // Only reset icons if we're not navigating away
+                            if (!isMobile() || fingerName !== activeFingerIcon?.id.split('-')[0]) {
+                                resetIcons();
+                            }
+                        }
                         
                         // Execute callback if provided and animation is complete
                         if (typeof callback === 'function') {
@@ -500,6 +580,8 @@
                         const ringIcon = document.getElementById('ring-icon');
                         if (ringIcon) {
                             ringIcon.style.opacity = '1';
+                            // Ensure no active class is present
+                            ringIcon.classList.remove('active');
                         }
                         
                         // Wait a moment with the finger down and icon visible
@@ -510,12 +592,19 @@
                                 positionFingerIcons();
                                 
                                 // After the finger opens, fade in the rest of the icons
+                                // and ensure no active classes remain
                                 setTimeout(() => {
                                     document.querySelectorAll('.finger-icon').forEach(icon => {
+                                        // Remove any active class that might be present
+                                        icon.classList.remove('active');
+                                        
                                         if (icon.id !== 'ring-icon') { // Skip ring icon as it's already visible
                                             icon.style.opacity = '1';
                                         }
                                     });
+                                    
+                                    // Reset active finger icon tracking
+                                    activeFingerIcon = null;
                                 }, 100);
                             });
                         }, 500); // Wait with finger down and icon visible
@@ -621,14 +710,28 @@
             } else {
                 // For mobile: intercept clicks, animate, then redirect
                 parentLink.addEventListener('click', function(e) {
-                    e.preventDefault(); // Prevent immediate navigation
+                    // If already animating, prevent new clicks
+                    if (isAnimating) {
+                        e.preventDefault();
+                        return;
+                    }
+                    
+                    // Store the URL we want to navigate to
+                    const targetUrl = this.href;
+                    
+                    // Prevent default initially
+                    e.preventDefault();
                     
                     // Animate finger closing
                     animateFinger(fingerName, 1, () => {
                         // After finger closes, animate opening
                         animateFinger(fingerName, -1, () => {
-                            // After animation completes, navigate to the link
-                            window.location.href = href;
+                            // Use history.pushState to add the current page to history before navigating
+                            const currentUrl = window.location.href;
+                            history.pushState({page: "hand"}, null, currentUrl);
+                            
+                            // Then navigate to the target URL
+                            window.location.href = targetUrl;
                         });
                     });
                 });
